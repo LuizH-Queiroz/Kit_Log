@@ -70,7 +70,7 @@ bool TSP::bestImprovement2Opt(Solucao& s) {
 
     if (melhorDelta < 0)
     {
-        std::reverse(s.caminho.begin() + melhor_i, s.caminho.begin() + melhor_j);
+        std::reverse(s.caminho.begin() + melhor_i, s.caminho.begin() + melhor_j + 1);
         s.custoMinimo = s.custoMinimo + melhorDelta;
         return true;
     }
@@ -210,7 +210,7 @@ bool TSP::bestImprovementSwap(Solucao& s) {
 
 
 void TSP::buscaLocal(Solucao& s) {
-    std::vector<int> NL = {1};
+    std::vector<int> NL = {1, 2};
 
     while(!NL.empty())
     {
@@ -225,25 +225,29 @@ void TSP::buscaLocal(Solucao& s) {
 
             case 2:
                 improved = bestImprovement2Opt(s);
+                // std::cout << "improved (2) = " << improved << std::endl;
                 break;
 
             case 3:
                 improved = bestImprovementOrOpt(s, 1);
+                // std::cout << "improved (3) = " << improved << std::endl;
                 break;
 
             case 4:
                 improved = bestImprovementOrOpt(s, 2);
+                // std::cout << "improved (4) = " << improved << std::endl;
                 break;
 
             case 5:
                 improved = bestImprovementOrOpt(s, 3);                
+                // std::cout << "improved (5) = " << improved << std::endl;
                 break;
         }
 
 
         if (improved)
         {
-            NL = {1};
+            NL = {1, 2};
         }
         else
         {
