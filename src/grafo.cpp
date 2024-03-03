@@ -10,13 +10,13 @@ std::vector<int> Grafo::escolher3NosAleatorios() {
 
     for (int i = 0; nos.size() < 3; i++)
     {
-        int no = rangeRandom(1, qtdVertices());
+        int no;
+        do {
+            no = rangeRandom(1, qtdVertices());
+        } while (std::find(nos.begin(), nos.end(), no) != nos.end());
 
         // Verifica se o no escolhido ainda nao foi usado
-        if (std::find(nos.begin(), nos.end(), no) == nos.end())
-        {
-            nos.push_back(no);
-        }
+        nos.push_back(no);
     }
 
     return nos;

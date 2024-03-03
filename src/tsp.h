@@ -49,11 +49,21 @@ class TSP {
          * 
         */
 
+        bool bestImprovement2Opt(Solucao&);
+
+        bool bestImprovementOrOpt(Solucao&, int);
+
+        bool bestImprovementSwap(Solucao&);
+
+        void buscaLocal(Solucao&);
+
         std::vector<InsertionInfo> calcularInsercoes(std::vector<int>, std::vector<int>);
 
         Solucao construcao();
 
         Solucao ILS(Grafo, int, int);
+
+        Solucao perturbacao(Solucao);
 };
 
 

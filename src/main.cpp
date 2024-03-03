@@ -7,6 +7,7 @@
 using namespace std;
 
 int main(int argc, char** argv) {
+    srand(time(NULL));
 
     auto data = Data(argc, argv[1]);
     data.read();
@@ -26,13 +27,11 @@ int main(int argc, char** argv) {
         }
     }
 
-
     TSP tsp;
-    int maxIterILS = (n < 150 ? n : n/2);
+    int maxIterILS = (n < 150 ? n : ceil(n/2));
     int maxIterBuscaLocal = 50;
 
-    tsp.grafo = grafo;
-
+    cout << "TSP" << endl;
     cout << tsp.ILS(grafo, maxIterILS, maxIterBuscaLocal).custoMinimo << endl;
 
 
