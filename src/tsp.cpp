@@ -82,7 +82,6 @@ bool TSP::bestImprovementOrOpt(Solucao& s, int tamanhoConjunto) {
     long double melhorDelta = 0;
     int inicioSegmento, novoInicio;
 
-
     for (int i = 1; (i + tamanhoConjunto) < s.caminho.size()-1; i++)
     {
         int v_inicio = s.caminho[i];
@@ -160,8 +159,6 @@ bool TSP::bestImprovementSwap(Solucao& s) {
     long double melhorDelta = 0;
     int melhor_i, melhor_j;
 
-    std::cout << "swap: ";
-    printVector(s.caminho);
     for (int i = 1; i < s.caminho.size()-1; i++)
     {
         int vi = s.caminho[i];
@@ -210,7 +207,7 @@ bool TSP::bestImprovementSwap(Solucao& s) {
 
 
 void TSP::buscaLocal(Solucao& s) {
-    std::vector<int> NL = {1, 2};
+    std::vector<int> NL = {1, 2, 3, 4, 5};
 
     while(!NL.empty())
     {
@@ -220,34 +217,63 @@ void TSP::buscaLocal(Solucao& s) {
         switch(NL[n]) {
             case 1:
                 improved = bestImprovementSwap(s);
+                if (improved)
+                {
+                    std::cout << "Swap: " << std::endl;
+                    printVector(s.caminho);
+                }
                 // std::cout << "improved (1) = " << improved << std::endl;
                 break;
 
             case 2:
                 improved = bestImprovement2Opt(s);
+                if (improved)
+                {
+                    std::cout << "2Opt: " << std::endl;
+                    printVector(s.caminho);
+                }
                 // std::cout << "improved (2) = " << improved << std::endl;
                 break;
 
             case 3:
                 improved = bestImprovementOrOpt(s, 1);
+                if (improved)
+                {
+                    std::cout << "OrOpt UM: " << std::endl;
+                    printVector(s.caminho);
+                }
                 // std::cout << "improved (3) = " << improved << std::endl;
                 break;
 
             case 4:
                 improved = bestImprovementOrOpt(s, 2);
+                if (improved)
+                {
+                    std::cout << "OrOpt DOIS: " << std::endl;
+                    printVector(s.caminho);
+                }
                 // std::cout << "improved (4) = " << improved << std::endl;
                 break;
 
             case 5:
-                improved = bestImprovementOrOpt(s, 3);                
+                improved = bestImprovementOrOpt(s, 3);      
+                if (improved)
+                {
+                    std::cout << "OrOpt TRES: " << std::endl;
+                    printVector(s.caminho);
+                }
                 // std::cout << "improved (5) = " << improved << std::endl;
+                break;
+            
+            default:
+                std::cout << "Valor invalido! (Switch)" << std::endl;
                 break;
         }
 
 
         if (improved)
         {
-            NL = {1, 2};
+            NL = {1, 2, 3, 4, 5};
         }
         else
         {
@@ -350,18 +376,18 @@ Solucao TSP::ILS(Grafo grafo, int maxIterILS, int maxIterBuscaLocal) {
     {
         Solucao s = construcao();
         Solucao melhorIter = s;
-        // std::cout << "CONSTRUCAO " << (i+1) << ", caminho: ";
-        // printVector(s.caminho);
+        std::cout << "construcao: ";
+        printVector(s.caminho);
 
         int contador = 0;
         for (int j = 0; j < maxIterBuscaLocal; j++)
         {
-            std::cout << "Busca Local " << ++contador << std::endl;
+            std::cout << "Busca Local " << ++contador << " | " << j << std::endl;
             buscaLocal(s);
             if (s.custoMinimo < melhorIter.custoMinimo)
             {
                 melhorIter = s;
-                j = 0;
+                j = (j == 0 ? -1 : 0);
             }
 
             s = perturbacao(melhorIter);
