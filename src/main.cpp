@@ -2,6 +2,7 @@
 #include "grafo.h"
 #include "tsp.h"
 #include <iostream>
+#include <iomanip>
 #include <algorithm>
 #include <chrono>
 #include <ratio>
@@ -34,15 +35,24 @@ int main(int argc, char** argv) {
     int maxIterBuscaLocal = (n >= 150 ? n/2 : n);
 
 
-    auto start = std::chrono::system_clock::now();
+    double totalTime = 0;
+    double betterCost = numeric_limits<double>::max();
+    for (int i = 0; i < 1; i++)
+    {
+        auto start = std::chrono::system_clock::now();
 
-    // cout << "TSP" << endl;
-    cout << tsp.ILS(grafo, maxIterILS, maxIterBuscaLocal).custoMinimo << endl;
+        // cout << "TSP" << endl;
+        betterCost = min(betterCost, tsp.ILS(grafo, maxIterILS, maxIterBuscaLocal).custoMinimo);
 
-    auto end = std::chrono::system_clock::now();
-    std::chrono::duration<double> elapsedTime = end - start;
+        auto end = std::chrono::system_clock::now();
+        std::chrono::duration<double> elapsedTime = end - start;
 
-    cout << elapsedTime.count() << endl;
+        totalTime += elapsedTime.count();
+    }
+
+    std::cout << betterCost << std::endl;
+    std::cout << fixed << setprecision(3) << (totalTime / 1.0) << std::endl;
+
 
     return 0;
 }

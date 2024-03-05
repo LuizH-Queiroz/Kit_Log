@@ -90,7 +90,7 @@ bool TSP::bestImprovementOrOpt(Solucao& s, int tamanhoConjunto) {
         int v_final = s.caminho[i + (tamanhoConjunto - 1)];
         int v_finalNext = s.caminho[i + tamanhoConjunto];
 
-        for (int j = 1; j < s.caminho.size()-1; j++)
+        for (int j = 1; j < s.caminho.size(); j++)
         {
             if (j >= i && j <= (i + tamanhoConjunto))
             {
@@ -132,26 +132,23 @@ bool TSP::bestImprovementOrOpt(Solucao& s, int tamanhoConjunto) {
     if (melhorDelta < 0)
     {
         // Realocando os vértices
-        std::vector<int> segmento;
-        for (int i = inicioSegmento; i < (inicioSegmento + tamanhoConjunto); i++)
+        if (novoInicio < inicioSegmento)
         {
-            segmento.push_back(s.caminho[i]);
+            std::rotate(
+                s.caminho.begin() + novoInicio,
+                s.caminho.begin() + inicioSegmento,
+                s.caminho.begin() + inicioSegmento + tamanhoConjunto
+            );
+        }
+        else // inicioSegmento < novoInicio
+        {
+            std::rotate(
+                s.caminho.begin() + inicioSegmento,
+                s.caminho.begin() + inicioSegmento + tamanhoConjunto,
+                s.caminho.begin() + novoInicio
+            );
         }
 
-        s.caminho.erase(s.caminho.begin() + inicioSegmento, s.caminho.begin() + (inicioSegmento + tamanhoConjunto));
-
-        // Talvez o índice do novo início precise ser atualizado (se for depois de onde estava o segmento)
-        if (novoInicio > inicioSegmento)
-        {
-            novoInicio -= tamanhoConjunto;
-        }
-        s.caminho.insert(s.caminho.begin() + novoInicio, segmento.begin(), segmento.end());
-        // std::rotate(
-        //     s.caminho.begin() + ,
-        //     s.caminho.begin() + ,
-        //     s.caminho.begin() + 
-        // );
-        
         // Atualizando o custo mínimo
         s.custoMinimo = s.custoMinimo + melhorDelta;
         return true;
