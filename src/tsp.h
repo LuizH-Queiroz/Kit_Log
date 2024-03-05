@@ -10,14 +10,14 @@ class Solucao {
     public:
 
         std::vector<int> caminho;
-        long double custoMinimo;
+        double custoMinimo;
 
         static const int _custoInvalido;
 
 
         Solucao();
 
-        Solucao(std::vector<int>, long double);
+        Solucao(std::vector<int>, double);
 };
 
 
@@ -25,7 +25,7 @@ class InsertionInfo {
     public:
         int noInserido;
         int indiceArestaRemovida;
-        long double custoInsercao;
+        double custoInsercao;
     
         bool operator<(InsertionInfo) const;
 };
@@ -57,7 +57,7 @@ class TSP {
 
         void buscaLocal(Solucao&);
 
-        std::vector<InsertionInfo> calcularInsercoes(std::vector<int>, std::vector<int>);
+        void calcularInsercoes(std::vector<int>, std::vector<int>, std::vector<InsertionInfo>&);
 
         Solucao construcao();
 

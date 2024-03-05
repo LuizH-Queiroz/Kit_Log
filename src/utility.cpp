@@ -17,3 +17,12 @@ void printVector(std::vector<int> vec) {
     }
     std::cout << std::endl;
 }
+
+
+bool temIntersecao(int l_1, int r_1, int l_2, int r_2) {
+    return (
+        (l_1 >= l_2 && l_1 <= r_2)
+        ||
+        (l_2 >= l_1 && l_2 <= r_1)
+    );
+}

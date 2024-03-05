@@ -8,7 +8,9 @@
 
 void printVector(std::vector<int>);
 
-int rangeRandom(int minimo, int maximo);
+int rangeRandom(int, int);
+
+bool temIntersecao(int, int, int, int);
 
 
 #endif

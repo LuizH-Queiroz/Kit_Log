@@ -3,6 +3,8 @@
 #include "tsp.h"
 #include <iostream>
 #include <algorithm>
+#include <chrono>
+#include <ratio>
 
 using namespace std;
 
@@ -15,7 +17,7 @@ int main(int argc, char** argv) {
     ///////////////////////////////
 
     Grafo grafo;
-    grafo.matriz.resize(n+1, vector<long double>(n+1));
+    grafo.matriz.resize(n+1, vector<double>(n+1));
 
     // cout << "MATRIZ" << endl;
     for (int i = 1; i <= n; i++)
@@ -28,12 +30,19 @@ int main(int argc, char** argv) {
     }
 
     TSP tsp;
-    int maxIterILS = (n < 150 ? n : ceil(n/2));
-    int maxIterBuscaLocal = 50;
+    int maxIterILS = 50;
+    int maxIterBuscaLocal = (n >= 150 ? n/2 : n);
 
-    cout << "TSP" << endl;
+
+    auto start = std::chrono::system_clock::now();
+
+    // cout << "TSP" << endl;
     cout << tsp.ILS(grafo, maxIterILS, maxIterBuscaLocal).custoMinimo << endl;
 
+    auto end = std::chrono::system_clock::now();
+    std::chrono::duration<double> elapsedTime = end - start;
+
+    cout << elapsedTime.count() << endl;
 
     return 0;
 }

@@ -13,7 +13,7 @@ class Grafo {
          * Variáveis
         */
  
-        std::vector<std::vector<long double>> matriz;
+        std::vector<std::vector<double>> matriz;
 
 
         /**

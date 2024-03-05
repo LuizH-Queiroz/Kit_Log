@@ -18,7 +18,7 @@ Solucao::Solucao() {
 }
 
 
-Solucao::Solucao(std::vector<int> caminho, long double custoMinimo) {
+Solucao::Solucao(std::vector<int> caminho, double custoMinimo) {
     this->caminho = caminho;
     this->custoMinimo = custoMinimo;
 }
@@ -34,7 +34,7 @@ bool InsertionInfo::operator<(InsertionInfo other) const {
 /***************************** Classe TSP *****************************/
 
 bool TSP::bestImprovement2Opt(Solucao& s) {
-    long double melhorDelta = 0;
+    double melhorDelta = 0;
     int melhor_i, melhor_j;
 
 
@@ -48,7 +48,7 @@ bool TSP::bestImprovement2Opt(Solucao& s) {
             int vj = s.caminho[j];
             int vj_next = s.caminho[j+1];
 
-            long double delta = (
+            double delta = (
                 // Retirada dos vértices de suas posições
                 - (grafo.matriz[vi][vi_prev])
                 - (grafo.matriz[vj][vj_next])
@@ -79,7 +79,7 @@ bool TSP::bestImprovement2Opt(Solucao& s) {
 
 
 bool TSP::bestImprovementOrOpt(Solucao& s, int tamanhoConjunto) {
-    long double melhorDelta = 0;
+    double melhorDelta = 0;
     int inicioSegmento, novoInicio;
 
     for (int i = 1; (i + tamanhoConjunto) < s.caminho.size()-1; i++)
@@ -101,7 +101,7 @@ bool TSP::bestImprovementOrOpt(Solucao& s, int tamanhoConjunto) {
             int newPrev = s.caminho[j-1];
             int newNext = s.caminho[j];
 
-            long double delta = (
+            double delta = (
                 // Retirada do segmento
                 - (grafo.matriz[v_inicio][v_inicioPrev] + grafo.matriz[v_final][v_finalNext])
 
@@ -146,6 +146,11 @@ bool TSP::bestImprovementOrOpt(Solucao& s, int tamanhoConjunto) {
             novoInicio -= tamanhoConjunto;
         }
         s.caminho.insert(s.caminho.begin() + novoInicio, segmento.begin(), segmento.end());
+        // std::rotate(
+        //     s.caminho.begin() + ,
+        //     s.caminho.begin() + ,
+        //     s.caminho.begin() + 
+        // );
         
         // Atualizando o custo mínimo
         s.custoMinimo = s.custoMinimo + melhorDelta;
@@ -156,7 +161,7 @@ bool TSP::bestImprovementOrOpt(Solucao& s, int tamanhoConjunto) {
 
 
 bool TSP::bestImprovementSwap(Solucao& s) {
-    long double melhorDelta = 0;
+    double melhorDelta = 0;
     int melhor_i, melhor_j;
 
     for (int i = 1; i < s.caminho.size()-1; i++)
@@ -171,7 +176,7 @@ bool TSP::bestImprovementSwap(Solucao& s) {
             int vj_prev = s.caminho[j-1];
             int vj_next = s.caminho[j+1];
 
-            long double delta = (
+            double delta = (
                 // Retirada dos vértices de suas posições
                 - (grafo.matriz[vi][vi_prev] + grafo.matriz[vi][vi_next])
                 - (grafo.matriz[vj][vj_prev] + grafo.matriz[vj][vj_next])
@@ -217,51 +222,51 @@ void TSP::buscaLocal(Solucao& s) {
         switch(NL[n]) {
             case 1:
                 improved = bestImprovementSwap(s);
-                if (improved)
-                {
-                    std::cout << "Swap: " << std::endl;
-                    printVector(s.caminho);
-                }
+                // if (improved)
+                // {
+                //     std::cout << "Swap: " << std::endl;
+                //     printVector(s.caminho);
+                // }
                 // std::cout << "improved (1) = " << improved << std::endl;
                 break;
 
             case 2:
                 improved = bestImprovement2Opt(s);
-                if (improved)
-                {
-                    std::cout << "2Opt: " << std::endl;
-                    printVector(s.caminho);
-                }
+                // if (improved)
+                // {
+                //     std::cout << "2Opt: " << std::endl;
+                //     printVector(s.caminho);
+                // }
                 // std::cout << "improved (2) = " << improved << std::endl;
                 break;
 
             case 3:
                 improved = bestImprovementOrOpt(s, 1);
-                if (improved)
-                {
-                    std::cout << "OrOpt UM: " << std::endl;
-                    printVector(s.caminho);
-                }
+                // if (improved)
+                // {
+                //     std::cout << "OrOpt UM: " << std::endl;
+                //     printVector(s.caminho);
+                // }
                 // std::cout << "improved (3) = " << improved << std::endl;
                 break;
 
             case 4:
                 improved = bestImprovementOrOpt(s, 2);
-                if (improved)
-                {
-                    std::cout << "OrOpt DOIS: " << std::endl;
-                    printVector(s.caminho);
-                }
+                // if (improved)
+                // {
+                //     std::cout << "OrOpt DOIS: " << std::endl;
+                //     printVector(s.caminho);
+                // }
                 // std::cout << "improved (4) = " << improved << std::endl;
                 break;
 
             case 5:
                 improved = bestImprovementOrOpt(s, 3);      
-                if (improved)
-                {
-                    std::cout << "OrOpt TRES: " << std::endl;
-                    printVector(s.caminho);
-                }
+                // if (improved)
+                // {
+                //     std::cout << "OrOpt TRES: " << std::endl;
+                //     printVector(s.caminho);
+                // }
                 // std::cout << "improved (5) = " << improved << std::endl;
                 break;
             
@@ -283,9 +288,9 @@ void TSP::buscaLocal(Solucao& s) {
 }
 
 
-std::vector<InsertionInfo> TSP::calcularInsercoes(std::vector<int> subtour, std::vector<int> CL) {
+void TSP::calcularInsercoes(std::vector<int> subtour, std::vector<int> CL, std::vector<InsertionInfo>& insercoes) {
     // std::cout << "START calcularInsercoes?" << std::endl;
-    std::vector<InsertionInfo> insercoes(CL.size() * (subtour.size() - 1));
+    insercoes.resize(CL.size() * (subtour.size() - 1));
     int indiceInsercao = 0;
     // std::cout << "START calcularInsercoes ok" << std::endl;
 
@@ -295,7 +300,7 @@ std::vector<InsertionInfo> TSP::calcularInsercoes(std::vector<int> subtour, std:
         {
             int v1 = subtour[i];
             int v2 = subtour[i+1];
-            long double custo = grafo.matriz[verticeCL][v1] + grafo.matriz[verticeCL][v2] - grafo.matriz[v1][v2];
+            double custo = grafo.matriz[verticeCL][v1] + grafo.matriz[verticeCL][v2] - grafo.matriz[v1][v2];
 
             insercoes[indiceInsercao].noInserido = verticeCL;
             insercoes[indiceInsercao].indiceArestaRemovida = i;
@@ -303,8 +308,6 @@ std::vector<InsertionInfo> TSP::calcularInsercoes(std::vector<int> subtour, std:
             indiceInsercao++;
         }
     }
-
-    return insercoes;
 }
 
 
@@ -334,13 +337,14 @@ Solucao TSP::construcao() {
     while(!CL.empty())
     {
         // Vetor com todas as inserções possíveis
-        std::vector<InsertionInfo> insercoes = calcularInsercoes(s.caminho, CL);
+        std::vector<InsertionInfo> insercoes;
+        calcularInsercoes(s.caminho, CL, insercoes);
 
         // Ordena o vetor de inserções em ordem crescente de custo de inserção
         std::sort(insercoes.begin(), insercoes.end());
 
         // Porcentagem das melhores inserções que serão consideradas para inserção
-        long double alpha = (long double) rangeRandom(1, 100) / 100.0;
+        double alpha = (double) rangeRandom(1, 100) / 100.0;
 
         // Valor mais alto de um índice que pode ser escolhido para inserção
         int limite = (CL.size() - 1) * alpha;
@@ -376,13 +380,13 @@ Solucao TSP::ILS(Grafo grafo, int maxIterILS, int maxIterBuscaLocal) {
     {
         Solucao s = construcao();
         Solucao melhorIter = s;
-        std::cout << "construcao: ";
-        printVector(s.caminho);
+        // std::cout << "construcao: ";
+        // printVector(s.caminho);
 
         int contador = 0;
         for (int j = 0; j < maxIterBuscaLocal; j++)
         {
-            std::cout << "Busca Local " << ++contador << " | " << j << std::endl;
+            // std::cout << "Busca Local " << ++contador << " | " << j << std::endl;
             buscaLocal(s);
             if (s.custoMinimo < melhorIter.custoMinimo)
             {
@@ -391,6 +395,8 @@ Solucao TSP::ILS(Grafo grafo, int maxIterILS, int maxIterBuscaLocal) {
             }
 
             s = perturbacao(melhorIter);
+            // std::cout << "Perturbacao:" << std::endl;
+            // printVector(s.caminho);
         }
 
 
@@ -405,5 +411,98 @@ Solucao TSP::ILS(Grafo grafo, int maxIterILS, int maxIterBuscaLocal) {
 
 
 Solucao TSP::perturbacao(Solucao s) {
+    // Tamanhos mínimo e máximo para os segmentos que serão trocados
+    int tamanhoMinimo = 2;
+    int tamanhoMaximo = ceil(s.caminho.size() / 10.0);
+
+    // Definindo o tamanho e inicio dos segmentos
+    int tamanho_1, inicio_1;
+    int tamanho_2, inicio_2;
+    do {
+
+        tamanho_1 = rangeRandom(tamanhoMinimo, tamanhoMaximo);
+        tamanho_2 = rangeRandom(tamanhoMinimo, tamanhoMaximo);
+
+        inicio_1 = rangeRandom(1, s.caminho.size() - (1 + tamanho_1));
+        inicio_2 = rangeRandom(1, s.caminho.size() - (1 + tamanho_2));
+
+    } while(temIntersecao(inicio_1, inicio_1+tamanho_1-1, inicio_2, inicio_2+tamanho_2-1));
+
+    // O segmento 1 deve ser o mais a esquerda para realizar a rotacao
+    if (inicio_2 < inicio_1)
+    {
+        std::swap(inicio_1, inicio_2);
+        std::swap(tamanho_1, tamanho_2);
+    }
+
+    // inicio_1 = rangeRandom(1, s.caminho.size() - 5);
+    // tamanho_1 - rangeRandom(tamanhoMinimo, std::min((int) (s.caminho.size() - 4) - inicio_1 + 1, tamanhoMaximo));
+
+    // inicio_2 = rangeRandom(inicio_1 + tamanho_1, s.caminho.size() - 3);
+    // tamanho_2 = rangeRandom(tamanhoMinimo, std::min((int) (s.caminho.size() - 2) - inicio_2 + 1, tamanhoMaximo));
+
+
+    // Recalculando o custo
+    int seg1_first = s.caminho[inicio_1],
+        seg1_prev = s.caminho[inicio_1 - 1],
+        seg1_last = s.caminho[inicio_1 + (tamanho_1 - 1)],
+        seg1_next = s.caminho[inicio_1 + tamanho_1];
+
+    int seg2_first = s.caminho[inicio_2],
+        seg2_prev = s.caminho[inicio_2 - 1],
+        seg2_last = s.caminho[inicio_2 + (tamanho_2 - 1)],
+        seg2_next = s.caminho[inicio_2 + tamanho_2];
+    
+    double delta;
+    if ((tamanho_1 + tamanho_2) < ((inicio_2 + tamanho_2 - 1) - inicio_1 + 1))
+    {
+        delta = (
+            // Retirando arestas
+            - (grafo.matriz[seg1_first][seg1_prev] + grafo.matriz[seg1_last][seg1_next])
+            - (grafo.matriz[seg2_first][seg2_prev] + grafo.matriz[seg2_last][seg2_next])
+
+            // Inserindo as novas arestas
+            + (grafo.matriz[seg1_prev][seg2_first] + grafo.matriz[seg2_last][seg1_next])
+            + (grafo.matriz[seg2_prev][seg1_first] + grafo.matriz[seg1_last][seg2_next])
+        );
+    }
+    else // (tamanho_1 + tamanho_2) == ((inicio_2 + tamanho_2 - 1) - inicio_1 + 1)
+    {
+        delta = (
+            // Retirando arestas
+            - (grafo.matriz[seg1_prev][seg1_first])
+            - (grafo.matriz[seg1_last][seg2_first])
+            - (grafo.matriz[seg2_last][seg2_next])
+
+            // Inserindo as novas arestas
+            + (grafo.matriz[seg1_prev][seg2_first])
+            + (grafo.matriz[seg2_last][seg1_first])
+            + (grafo.matriz[seg1_last][seg2_next])
+        );
+    }
+
+    s.custoMinimo = s.custoMinimo + delta;
+
+
+    // Realizando a troca dos segmentos
+    std::rotate(
+        s.caminho.begin() + inicio_1,
+        s.caminho.begin() + inicio_2,
+        s.caminho.begin() + inicio_2 + tamanho_2
+    );
+
+    if ((tamanho_1 + tamanho_2) < ((inicio_2 + tamanho_2 - 1) - inicio_1 + 1))
+    {
+        std::rotate(
+            s.caminho.begin() + inicio_1 + tamanho_2,
+            s.caminho.begin() + inicio_1 + tamanho_2 + tamanho_1,
+            s.caminho.begin() + inicio_2 + tamanho_2
+        );
+    }
+
+    // std::cout << "inicio_1 = " << inicio_1 << "; tamanho_1 = " << tamanho_1 << std::endl
+    //           << "inicio_2 = " << inicio_2 << "; tamanho_2 = " << tamanho_2 << std::endl;
+
+
     return s;
 }
