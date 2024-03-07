@@ -432,12 +432,6 @@ Solucao TSP::perturbacao(Solucao s) {
         std::swap(tamanho_1, tamanho_2);
     }
 
-    // inicio_1 = rangeRandom(1, s.caminho.size() - 5);
-    // tamanho_1 - rangeRandom(tamanhoMinimo, std::min((int) (s.caminho.size() - 4) - inicio_1 + 1, tamanhoMaximo));
-
-    // inicio_2 = rangeRandom(inicio_1 + tamanho_1, s.caminho.size() - 3);
-    // tamanho_2 = rangeRandom(tamanhoMinimo, std::min((int) (s.caminho.size() - 2) - inicio_2 + 1, tamanhoMaximo));
-
 
     // Recalculando o custo
     int seg1_first = s.caminho[inicio_1],
