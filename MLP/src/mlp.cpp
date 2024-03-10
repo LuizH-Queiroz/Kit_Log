@@ -37,14 +37,14 @@ bool InsertionInfo::operator<(InsertionInfo other) const {
 
 /**
  * inicio: inicio do segmento que foi alterado
- * final: final do segmento que foi alterado
+ * fim: fim do segmento que foi alterado
 */
-void MLP::atualizarMatriz(Solucao& s, int inicio, int final) {
+void MLP::atualizarMatriz(Solucao& s, int inicio, int fim) {
     int qtdVertices = s.caminho.size();
 
     // Atualizando as subsequências de vértices únicos (tamanho 1)
     // que foram modificadas
-    for (int i = inicio; i <= final; i++)
+    for (int i = inicio; i <= fim; i++)
     {
         matriz_subseq[i][i].primeiro = s.caminho[i];
         matriz_subseq[i][i].ultimo = s.caminho[i];
@@ -56,7 +56,7 @@ void MLP::atualizarMatriz(Solucao& s, int inicio, int final) {
 
 
     // Atualizando as subsequências não invertidas
-    for (int i = 0; i <= final; i++)
+    for (int i = 0; i <= fim; i++)
     {
         for (int j = std::max(inicio, i+1); j < qtdVertices; j++)
         {
@@ -71,7 +71,7 @@ void MLP::atualizarMatriz(Solucao& s, int inicio, int final) {
     // Atualizando as subsequências invertidas
     for (int i = qtdVertices-1; i >= inicio; i--)
     {
-        for (int j = std::min(final, i-1); j >= 0; j--)
+        for (int j = std::min(fim, i-1); j >= 0; j--)
         {
             matriz_subseq[i][j] = Subsequence::concatenar(
                 matriz_subseq[i][j+1],
@@ -118,17 +118,11 @@ bool MLP::bestImprovement2Opt(Solucao& s) {
 
 
 bool MLP::bestImprovementOrOpt(Solucao& s, int tamanhoConjunto) {
-    double melhorDelta = 0;
+    double melhorCusto = s.custoMinimo;
     int inicioSegmento, novoInicio;
 
     for (int i = 1; (i + tamanhoConjunto) < s.caminho.size()-1; i++)
     {
-        int v_inicio = s.caminho[i];
-        int v_inicioPrev = s.caminho[i-1];
-
-        int v_final = s.caminho[i + (tamanhoConjunto - 1)];
-        int v_finalNext = s.caminho[i + tamanhoConjunto];
-
         for (int j = 1; j < s.caminho.size(); j++)
         {
             if (j >= i && j <= (i + tamanhoConjunto))
@@ -136,31 +130,24 @@ bool MLP::bestImprovementOrOpt(Solucao& s, int tamanhoConjunto) {
                 continue;
             }
 
-            // Vértices que agora ficarão, respectivamente, antes e depois do segmento
-            int newPrev = s.caminho[j-1];
-            int newNext = s.caminho[j];
-
-            double delta = (
-                // Retirada do segmento
-                - (grafo.matriz[v_inicio][v_inicioPrev] + grafo.matriz[v_final][v_finalNext])
-
-                // Inserindo aresta que conecta os vértices que vêm antes e depois do segmento
-                + (grafo.matriz[v_inicioPrev][v_finalNext])
-
-                /**
-                 * Agora vem a parte relativa à posição de inserção do segmento
-                */
-                // Retirada da aresta onde será posto o segmento
-                - (grafo.matriz[newPrev][newNext])
-
-                // Inserção dos vértices nas suas novas posições
-                + (grafo.matriz[v_inicio][newPrev] + grafo.matriz[v_final][newNext])
-            );
-
-
-            if (delta < melhorDelta)
+            Subsequence sigma;
+            if (j < i)
             {
-                melhorDelta = delta;
+                sigma = Subsequence::concatenar(matriz_subseq[0][j-1], matriz_subseq[i][i+(tamanhoConjunto-1)], grafo);
+                sigma = Subsequence::concatenar(sigma, matriz_subseq[j][i-1], grafo);
+                sigma = Subsequence::concatenar(sigma, matriz_subseq[i+tamanhoConjunto][s.caminho.size()-1], grafo);
+            }
+            else // j > i
+            {
+                sigma = Subsequence::concatenar(matriz_subseq[0][i-1], matriz_subseq[i+tamanhoConjunto][j-1], grafo);
+                sigma = Subsequence::concatenar(sigma, matriz_subseq[i][i+(tamanhoConjunto-1)], grafo);
+                sigma = Subsequence::concatenar(sigma, matriz_subseq[j][s.caminho.size()-1], grafo);
+            }
+
+
+            if (sigma.custoAcumulado < melhorCusto)
+            {
+                melhorCusto = sigma.custoAcumulado;
                 inicioSegmento = i;
                 novoInicio = j;
             }
@@ -168,7 +155,7 @@ bool MLP::bestImprovementOrOpt(Solucao& s, int tamanhoConjunto) {
     }
 
 
-    if (melhorDelta < 0)
+    if (melhorCusto < s.custoMinimo)
     {
         // Realocando os vértices
         if (novoInicio < inicioSegmento)
@@ -189,7 +176,13 @@ bool MLP::bestImprovementOrOpt(Solucao& s, int tamanhoConjunto) {
         }
 
         // Atualizando o custo mínimo
-        s.custoMinimo = s.custoMinimo + melhorDelta;
+        s.custoMinimo = melhorCusto;
+
+        atualizarMatriz(
+            s,
+            std::min(inicioSegmento, novoInicio),
+            std::max(inicioSegmento + (tamanhoConjunto - 1), novoInicio - 1)
+        );
         return true;
     }
     return false;
@@ -236,7 +229,7 @@ bool MLP::bestImprovementSwap(Solucao& s) {
 
 
 void MLP::buscaLocal(Solucao& s) {
-    std::vector<int> NL = {1, 2};
+    std::vector<int> NL = {1, 2, 3, 4, 5};
 
     while(!NL.empty())
     {
@@ -249,7 +242,7 @@ void MLP::buscaLocal(Solucao& s) {
                 // if (improved)
                 // {
                 //     std::cout << "Swap: " << std::endl;
-                //     printVector(s.caminho);
+                //     // printVector(s.caminho);
                 // }
                 // std::cout << "improved (1) = " << improved << std::endl;
                 break;
@@ -259,7 +252,7 @@ void MLP::buscaLocal(Solucao& s) {
                 // if (improved)
                 // {
                 //     std::cout << "2Opt: " << std::endl;
-                //     printVector(s.caminho);
+                //     // printVector(s.caminho);
                 // }
                 // std::cout << "improved (2) = " << improved << std::endl;
                 break;
@@ -269,7 +262,7 @@ void MLP::buscaLocal(Solucao& s) {
                 // if (improved)
                 // {
                 //     std::cout << "OrOpt UM: " << std::endl;
-                //     printVector(s.caminho);
+                //     // printVector(s.caminho);
                 // }
                 // std::cout << "improved (3) = " << improved << std::endl;
                 break;
@@ -279,7 +272,7 @@ void MLP::buscaLocal(Solucao& s) {
                 // if (improved)
                 // {
                 //     std::cout << "OrOpt DOIS: " << std::endl;
-                //     printVector(s.caminho);
+                //     // printVector(s.caminho);
                 // }
                 // std::cout << "improved (4) = " << improved << std::endl;
                 break;
@@ -289,20 +282,20 @@ void MLP::buscaLocal(Solucao& s) {
                 // if (improved)
                 // {
                 //     std::cout << "OrOpt TRES: " << std::endl;
-                //     printVector(s.caminho);
+                //     // printVector(s.caminho);
                 // }
                 // std::cout << "improved (5) = " << improved << std::endl;
                 break;
             
             default:
-                std::cout << "Valor invalido! (Switch)" << std::endl;
+                // std::cout << "Valor invalido! (Switch)" << std::endl;
                 break;
         }
 
 
         if (improved)
         {
-            NL = {1, 2};
+            NL = {1, 2, 3, 4, 5};
         }
         else
         {
@@ -343,7 +336,7 @@ Solucao MLP::construcao() {
     {
         // Inserção do vértice.
         // Complexidade constante amortizada: https://cplusplus.com/reference/set/set/insert/
-        CL.insert(/*CL.end(),*/ i);
+        CL.insert(CL.end(), i);
     }
 
 
@@ -455,7 +448,7 @@ Solucao MLP::ILS(Grafo grafo, int maxIterILS, int maxIterBuscaLocal) {
                 j = (j == 0 ? -1 : 0);
             }
 
-            // s = perturbacao(melhorIter);
+            s = perturbacao(melhorIter);
             // std::cout << "Perturbacao:" << std::endl;
             // printVector(s.caminho);
         }
@@ -497,48 +490,6 @@ Solucao MLP::perturbacao(Solucao s) {
     }
 
 
-    // Recalculando o custo
-    int seg1_first = s.caminho[inicio_1],
-        seg1_prev = s.caminho[inicio_1 - 1],
-        seg1_last = s.caminho[inicio_1 + (tamanho_1 - 1)],
-        seg1_next = s.caminho[inicio_1 + tamanho_1];
-
-    int seg2_first = s.caminho[inicio_2],
-        seg2_prev = s.caminho[inicio_2 - 1],
-        seg2_last = s.caminho[inicio_2 + (tamanho_2 - 1)],
-        seg2_next = s.caminho[inicio_2 + tamanho_2];
-    
-    double delta;
-    if ((tamanho_1 + tamanho_2) < ((inicio_2 + tamanho_2 - 1) - inicio_1 + 1))
-    {
-        delta = (
-            // Retirando arestas
-            - (grafo.matriz[seg1_first][seg1_prev] + grafo.matriz[seg1_last][seg1_next])
-            - (grafo.matriz[seg2_first][seg2_prev] + grafo.matriz[seg2_last][seg2_next])
-
-            // Inserindo as novas arestas
-            + (grafo.matriz[seg1_prev][seg2_first] + grafo.matriz[seg2_last][seg1_next])
-            + (grafo.matriz[seg2_prev][seg1_first] + grafo.matriz[seg1_last][seg2_next])
-        );
-    }
-    else // (tamanho_1 + tamanho_2) == ((inicio_2 + tamanho_2 - 1) - inicio_1 + 1)
-    {
-        delta = (
-            // Retirando arestas
-            - (grafo.matriz[seg1_prev][seg1_first])
-            - (grafo.matriz[seg1_last][seg2_first])
-            - (grafo.matriz[seg2_last][seg2_next])
-
-            // Inserindo as novas arestas
-            + (grafo.matriz[seg1_prev][seg2_first])
-            + (grafo.matriz[seg2_last][seg1_first])
-            + (grafo.matriz[seg1_last][seg2_next])
-        );
-    }
-
-    s.custoMinimo = s.custoMinimo + delta;
-
-
     // Realizando a troca dos segmentos
     std::rotate(
         s.caminho.begin() + inicio_1,
@@ -557,7 +508,8 @@ Solucao MLP::perturbacao(Solucao s) {
 
 
     // Atualizando a matriz de subsequências
-    atualizarMatriz(s, inicio_1, inicio_1 + (tamanho_2 - 1));
+    atualizarMatriz(s, 0, s.caminho.size()-1);
+    s.custoMinimo = matriz_subseq[0][s.caminho.size()-1].custoAcumulado;
 
     // std::cout << "inicio_1 = " << inicio_1 << "; tamanho_1 = " << tamanho_1 << std::endl
     //           << "inicio_2 = " << inicio_2 << "; tamanho_2 = " << tamanho_2 << std::endl;
