@@ -84,33 +84,20 @@ void MLP::atualizarMatriz(Solucao& s, int inicio, int final) {
 
 
 bool MLP::bestImprovement2Opt(Solucao& s) {
-    double melhorDelta = 0;
+    double melhorCusto = s.custoMinimo;
     int melhor_i, melhor_j;
 
 
     for (int i = 1; i < s.caminho.size()-1; i++)
     {
-        int vi = s.caminho[i];
-        int vi_prev = s.caminho[i-1];
-
         for (int j = i+1; j < s.caminho.size()-1; j++)
         {
-            int vj = s.caminho[j];
-            int vj_next = s.caminho[j+1];
+            Subsequence sigma = Subsequence::concatenar(matriz_subseq[0][i-1], matriz_subseq[j][i], grafo);
+            sigma = Subsequence::concatenar(sigma, matriz_subseq[j+1][s.caminho.size()-1], grafo);
 
-            double delta = (
-                // Retirada dos vértices de suas posições
-                - (grafo.matriz[vi][vi_prev])
-                - (grafo.matriz[vj][vj_next])
-
-                // Inserção dos vértices nas suas novas posições
-                + (grafo.matriz[vi][vj_next])
-                + (grafo.matriz[vj][vi_prev])
-            );
-
-            if (delta < melhorDelta)
+            if (sigma.custoAcumulado < melhorCusto)
             {
-                melhorDelta = delta;
+                melhorCusto = sigma.custoAcumulado;
                 melhor_i = i;
                 melhor_j = j;
             }
@@ -118,10 +105,12 @@ bool MLP::bestImprovement2Opt(Solucao& s) {
     }
 
 
-    if (melhorDelta < 0)
+    if (melhorCusto < s.custoMinimo)
     {
         std::reverse(s.caminho.begin() + melhor_i, s.caminho.begin() + melhor_j + 1);
-        s.custoMinimo = s.custoMinimo + melhorDelta;
+        s.custoMinimo = melhorCusto;
+
+        atualizarMatriz(s, melhor_i, melhor_j);
         return true;
     }
     return false;
@@ -208,7 +197,7 @@ bool MLP::bestImprovementOrOpt(Solucao& s, int tamanhoConjunto) {
 
 
 bool MLP::bestImprovementSwap(Solucao& s) {
-    double melhorDelta = s.custoMinimo;
+    double melhorCusto = s.custoMinimo;
     int melhor_i, melhor_j;
 
     for (int i = 1; i < s.caminho.size()-1; i++)
@@ -224,9 +213,9 @@ bool MLP::bestImprovementSwap(Solucao& s) {
             sigma = Subsequence::concatenar(sigma, matriz_subseq[i][i], grafo);
             sigma = Subsequence::concatenar(sigma, matriz_subseq[j+1][s.caminho.size()-1], grafo);
 
-            if (sigma.custoAcumulado < melhorDelta)
+            if (sigma.custoAcumulado < melhorCusto)
             {
-                melhorDelta = sigma.custoAcumulado;
+                melhorCusto = sigma.custoAcumulado;
                 melhor_i = i;
                 melhor_j = j;
             }
@@ -234,10 +223,10 @@ bool MLP::bestImprovementSwap(Solucao& s) {
     }
 
 
-    if (melhorDelta < s.custoMinimo)
+    if (melhorCusto < s.custoMinimo)
     {
         std::swap(s.caminho[melhor_i], s.caminho[melhor_j]);
-        s.custoMinimo = melhorDelta;
+        s.custoMinimo = melhorCusto;
 
         atualizarMatriz(s, melhor_i, melhor_j);
         return true;
@@ -247,7 +236,7 @@ bool MLP::bestImprovementSwap(Solucao& s) {
 
 
 void MLP::buscaLocal(Solucao& s) {
-    std::vector<int> NL = {1};
+    std::vector<int> NL = {1, 2};
 
     while(!NL.empty())
     {
@@ -313,7 +302,7 @@ void MLP::buscaLocal(Solucao& s) {
 
         if (improved)
         {
-            NL = {1};
+            NL = {1, 2};
         }
         else
         {
@@ -344,18 +333,22 @@ void MLP::calcularInsercoes(std::vector<int>& subtour, std::set<int>& CL, std::v
 Solucao MLP::construcao() {
     Solucao s;
     s.caminho = {1}; // Inicializando o caminho da solução com o vértice 1
+    double duracao = 0, acumulado = 0;
 
     // Conjunto dos vértices candidatos para inserção (inicialmente todos)
     std::set<int> CL;
 
     int qtdVertices = grafo.qtdVertices();
-    for (int i = 2; i < qtdVertices; i++)
+    for (int i = 2; i <= qtdVertices; i++)
     {
         // Inserção do vértice.
         // Complexidade constante amortizada: https://cplusplus.com/reference/set/set/insert/
-        CL.insert(CL.end(), i);
+        CL.insert(/*CL.end(),*/ i);
     }
 
+
+    // Porcentagem das melhores inserções que serão consideradas para inserção
+    double alpha = (double) rangeRandom(0, 25) / 100.0;
 
     // A cada iteração um dos vértices de CL será inserido na solução
     while(!CL.empty())
@@ -366,9 +359,6 @@ Solucao MLP::construcao() {
 
         // Ordena o vetor de inserções em ordem crescente de custo de inserção
         std::sort(insercoes.begin(), insercoes.end());
-
-        // Porcentagem das melhores inserções que serão consideradas para inserção
-        double alpha = (double) rangeRandom(1, 25) / 100.0;
 
         // Valor mais alto de um índice que pode ser escolhido para inserção
         int limite = (CL.size() - 1) * alpha;
@@ -387,10 +377,13 @@ Solucao MLP::construcao() {
     // a criar uma sequência circular
     s.caminho.push_back(s.caminho.front());
 
+
     // Criação da matriz de subsequências e
     // definição do custo total do caminho construído
     criarMatrizCompleta(s);
     s.custoMinimo = matriz_subseq[0][s.caminho.size()-1].custoAcumulado;
+
+    // std::cout << "s.custoMinimo = " << s.custoMinimo << std:: endl;
 
     return s;
 }
@@ -449,6 +442,7 @@ Solucao MLP::ILS(Grafo grafo, int maxIterILS, int maxIterBuscaLocal) {
         Solucao melhorIter = s;
         // std::cout << "construcao: ";
         // printVector(s.caminho);
+        // std::cout << std::endl;
 
         int contador = 0;
         for (int j = 0; j < maxIterBuscaLocal; j++)
@@ -461,7 +455,7 @@ Solucao MLP::ILS(Grafo grafo, int maxIterILS, int maxIterBuscaLocal) {
                 j = (j == 0 ? -1 : 0);
             }
 
-            s = perturbacao(melhorIter);
+            // s = perturbacao(melhorIter);
             // std::cout << "Perturbacao:" << std::endl;
             // printVector(s.caminho);
         }

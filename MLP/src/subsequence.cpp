@@ -14,7 +14,7 @@ Subsequence Subsequence::concatenar(Subsequence& sigma_1, Subsequence& sigma_2, 
     novoSigma.duracao = sigma_1.duracao + custoAresta + sigma_2.duracao;
     novoSigma.custoAcumulado = (
         + sigma_1.custoAcumulado
-        + sigma_2.custoAtraso * (sigma_1.custoAcumulado + custoAresta)
+        + sigma_2.custoAtraso * (sigma_1.duracao + custoAresta)
         + sigma_2.custoAcumulado
     );
 
