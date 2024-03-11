@@ -121,7 +121,7 @@ bool MLP::bestImprovementOrOpt(Solucao& s, int tamanhoConjunto) {
     double melhorCusto = s.custoMinimo;
     int inicioSegmento, novoInicio;
 
-    for (int i = 1; (i + tamanhoConjunto) < s.caminho.size()-1; i++)
+    for (int i = 1; (i + tamanhoConjunto) < s.caminho.size(); i++)
     {
         for (int j = 1; j < s.caminho.size(); j++)
         {
