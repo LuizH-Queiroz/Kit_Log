@@ -1,0 +1,9 @@
+bayg29.tsp 0.043 1610
+bays29.tsp 0.05 2020
+burma14.tsp 0.004 3323
+fri26.tsp 0.033 937
+gr17.tsp 0.008 2085
+gr21.tsp 0.014 2707
+gr24.tsp 0.028 1272
+ulysses16.tsp 0.008 6859
+ulysses22.tsp 0.019 7013
