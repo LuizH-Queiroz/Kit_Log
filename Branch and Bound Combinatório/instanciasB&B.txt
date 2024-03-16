@@ -6,4 +6,3 @@ gr17.tsp 0.008 2085
 gr21.tsp 0.014 2707
 gr24.tsp 0.028 1272
 ulysses16.tsp 0.008 6859
-ulysses22.tsp 0.019 7013

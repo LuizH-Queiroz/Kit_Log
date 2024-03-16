@@ -1,11 +1,10 @@
-#ifndef BB_H
-#define BB_H
+#ifndef BB_TSP_H
+#define BB_TSP_H
 
 
 #include <vector>
 #include <list>
 #include <queue>
-#include "grafo.h"
 #include "hungarian.h"
 
 
@@ -50,15 +49,16 @@ struct BB_TSP {
 
     // "numeric_limits<double>::infinity()" might cause problems in the Hungarian
     // Algorithm implementation. So this one shall be used instead
-    static double MATRIX_INFINITY;
+    static double ARC_INFINITY;
 
 
     /**
      * Variables
     */
 
-    // TSP's instance graph
-    Grafo graph;
+    // TSP's instance graph (matrix)
+    double **graph;
+    int dimension; // graph's number of vertices
 
     // Branching Strategy that must be used
     BRANCHING_STRATEGY branching_strategy;
@@ -79,17 +79,21 @@ struct BB_TSP {
      * Methods
     */
 
-    // Deletes the last returned Node by the "getNextNode" method
-    void deleteNode();
-
-    // Modify the input vector so it contains all the subtours from the last
-    // Assigning Problem solved by the Hungarian Algorithm
-    void    getSubtours(std::vector<std::vector<int>>&);
-
     // Returns the next node to be processed, depending on the "branching_strategy"
-    Node&   getNextNode();
+    Node    getNextNode();
 
-    double  solveTSP(Grafo const &, BRANCHING_STRATEGY);
+    // Insert the Node at the right Data Structure
+    void    insertNode(Node&);
+
+    // Modify the input node so it contains all the subtours obtained from the
+    // Hungarian Algorithm
+    void    setSubtours(Node&, int**);
+
+    // Uses the Hungarian Algorithm to solve the Node and returns
+    // the obtained cost
+    void    solveNode(Node&);
+
+    double  solveTSP(double**, int, BRANCHING_STRATEGY);
 
     // If there are no more Nodes, return true.
     // Returns false otherwise.

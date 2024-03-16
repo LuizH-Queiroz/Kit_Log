@@ -1,11 +1,14 @@
 #include <iostream>
+#include <iomanip>
 #include <vector>
 #include <string>
 #include <cstring>
 #include <fstream>
 #include <queue>
+#include <chrono>
 #include "data.h"
 #include "hungarian.h"
+#include "b&b.h"
 
 #define ARQUIVO_INSTANCIAS "instanciasB&B.txt"
 
@@ -64,20 +67,53 @@ int main() {
 			}
 		}
 
-		hungarian_problem_t p;
-		int mode = HUNGARIAN_MODE_MINIMIZE_COST;
-		hungarian_init(&p, cost, data->getDimension(), data->getDimension(), mode); // Carregando o problema
+		// hungarian_problem_t p;
+		// int mode = HUNGARIAN_MODE_MINIMIZE_COST;
+		// hungarian_init(&p, cost, data->getDimension(), data->getDimension(), mode); // Carregando o problema
 
-		double obj_value = hungarian_solve(&p);
-		cout << "Obj. value: " << obj_value << endl;
+		// double obj_value = hungarian_solve(&p);
+		// cout << "Obj. value: " << obj_value << endl;
 
-		cout << "Assignment" << endl;
-		hungarian_print_assignment(&p);
+		// cout << "Assignment" << endl;
+		// hungarian_print_assignment(&p);
 
-		hungarian_free(&p);
+		// hungarian_free(&p);
+		// continue;
+
+		BB_TSP bb;
+		chrono::_V2::system_clock::time_point start;
+		chrono::_V2::system_clock::time_point end;
+		chrono::duration<double> timeDFS, timeBFS, timeMLB;
+
+		cout << endl;
+		cout << instancia.nome << endl;
+
+		start = chrono::system_clock::now();
+		cout << "DFS: " << bb.solveTSP(cost, data->getDimension(), BB_TSP::BRANCHING_STRATEGY::DFS);
+		end = chrono::system_clock::now();
+		timeDFS = end - start;
+		cout << " " << timeDFS.count() << endl;
+
+		start = chrono::system_clock::now();
+		cout << "BFS: " << bb.solveTSP(cost, data->getDimension(), BB_TSP::BRANCHING_STRATEGY::BFS);
+		end = chrono::system_clock::now();
+		timeBFS = end - start;
+		cout << " " << timeBFS.count() << endl;
+
+		start = chrono::system_clock::now();
+		cout << "Minimum LB: " << bb.solveTSP(cost, data->getDimension(), BB_TSP::BRANCHING_STRATEGY::MINIMUM_LOWER_BOUND);
+		end = chrono::system_clock::now();
+		timeMLB = end - start;
+		cout << " " << timeMLB.count() << endl;
+
 		for (int i = 0; i < data->getDimension(); i++) delete [] cost[i];
 		delete [] cost;
 		delete data;
+		////////////////////////////////////////////////////////
+		ofstream arquivoSaida("resultados.txt", ios_base::app);
+
+		arquivoSaida << fixed << setprecision(3);
+		arquivoSaida << instancia.nome << " " << timeDFS.count() << " " << timeBFS.count() << " " << timeMLB.count() << endl;
 	}
 
 	return 0;
